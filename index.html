@@ -46,6 +46,13 @@
         table tbody tr.highlight {
             background-color: #d4f4dd; /* Highlight completed achievements */
         }
+        #loadingSpinner {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -56,22 +63,22 @@
     <div class="container">
         <form id="raiderForm">
             <div class="form-group">
-                <label for="guildRegion">Region:</label>
+                <label for="guildRegion" aria-label="Region">Region:</label>
                 <input type="text" id="guildRegion" placeholder="e.g., US" required>
             </div>
             <div class="form-group">
-                <label for="guildRealm">Realm:</label>
+                <label for="guildRealm" aria-label="Realm">Realm:</label>
                 <input type="text" id="guildRealm" placeholder="e.g., Illidan" required>
             </div>
             <div class="form-group">
-                <label for="guildName">Guild Name:</label>
+                <label for="guildName" aria-label="Guild Name">Guild Name:</label>
                 <input type="text" id="guildName" placeholder="e.g., YourGuildName" required>
             </div>
             <button type="submit">Fetch Guild Info</button>
         </form>
         
         <div class="filter-group">
-            <label for="filterRole">Filter by Role:</label>
+            <label for="filterRole" aria-label="Filter by Role">Filter by Role:</label>
             <select id="filterRole">
                 <option value="">All</option>
                 <option value="Tank">Tank</option>
@@ -82,6 +89,7 @@
 
         <div id="output">
             <h2>Guild Members:</h2>
+            <div id="loadingSpinner" style="display: none;">Loading...</div>
             <table id="guildTable">
                 <thead>
                     <tr>
@@ -107,7 +115,8 @@
 
             // Add a loading indicator
             const output = document.getElementById('output');
-            output.innerHTML = '<p>Loading guild data...</p>';
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.style.display = 'block';
 
             try {
                 const response = await fetch(`https://raider.io/api/v1/guilds/profile?region=${region}&realm=${realm}&name=${guildName}&fields=members`);
@@ -118,13 +127,45 @@
                 }
 
                 const data = await response.json();
+                spinner.style.display = 'none'; // Hide loading spinner
                 output.innerHTML = ''; // Clear loading indicator
                 displayGuildData(data);
             } catch (error) {
+                spinner.style.display = 'none'; // Hide loading spinner
                 output.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
             }
         });
 
         const displayGuildData = (data) => {
             const roster = data.members;
-            const tableBody = document.getElement
+            const tableBody = document.querySelector('#guildTable tbody');
+            tableBody.innerHTML = ''; // Clear previous data
+
+            roster.forEach((member) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${member.character.name}</td>
+                    <td>${member.character.role}</td>
+                    <td>${member.character.achievementPoints}</td>
+                `;
+
+                // Highlight rows conditionally (example: if achievement points > 10000)
+                if (member.character.achievementPoints > 10000) {
+                    row.classList.add('highlight');
+                }
+
+                tableBody.appendChild(row);
+            });
+        };
+
+        document.getElementById('filterRole').addEventListener('change', (e) => {
+            const selectedRole = e.target.value;
+            const rows = document.querySelectorAll('#guildTable tbody tr');
+            rows.forEach(row => {
+                const role = row.children[1].textContent; // Assuming the role is in the second column
+                row.style.display = (selectedRole === '' || role === selectedRole) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
