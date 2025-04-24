@@ -42,21 +42,27 @@
 <body>
     <header>
         <h1>Glory Achievement Planner</h1>
-        <p>Enter your guild's details to fetch Raider.IO data</p>
+        <p>Select your realm and enter guild details to fetch Raider.IO data</p>
     </header>
     <div class="container">
         <form id="guildForm">
             <div class="form-group">
                 <label for="guildRegion">Region:</label>
-                <input type="text" id="guildRegion" placeholder="e.g., US" required>
+                <input type="text" id="guildRegion" value="us" required>
             </div>
             <div class="form-group">
                 <label for="guildRealm">Realm:</label>
-                <input type="text" id="guildRealm" placeholder="e.g., Illidan" required>
+                <select id="guildRealm" required>
+                    <option value="area-52">Area 52</option>
+                    <option value="illidan">Illidan</option>
+                    <option value="stormrage">Stormrage</option>
+                    <option value="zuljin">Zul'jin</option>
+                    <!-- Add more realms as needed -->
+                </select>
             </div>
             <div class="form-group">
                 <label for="guildName">Guild Name:</label>
-                <input type="text" id="guildName" placeholder="e.g., AwesomeGuild" required>
+                <input type="text" id="guildName" value="Show Me Your Kitties" required>
             </div>
             <button type="submit">Fetch Guild Info</button>
         </form>
@@ -98,15 +104,19 @@
                 const data = await response.json();
                 output.innerHTML = ""; // Clear loading indicator
                 
-                data.members.forEach(member => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${member.character.name}</td>
-                        <td>${member.character.role || "N/A"}</td>
-                        <td>${member.character.achievementPoints || "N/A"}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
+                if (data.members && data.members.length > 0) {
+                    data.members.forEach(member => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${member.character.name}</td>
+                            <td>${member.character.role || "N/A"}</td>
+                            <td>${member.character.achievementPoints || "N/A"}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="3">No members found for this guild</td></tr>';
+                }
             } catch (error) {
                 output.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
             }
