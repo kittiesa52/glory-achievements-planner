@@ -108,7 +108,9 @@
     <script>
         document.getElementById('raiderForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
+            
+            console.log(document.getElementById('guildTable'));
+            console.log(document.getElementById('guildTable').querySelector('tbody'));
             const region = document.getElementById('guildRegion').value;
             const realm = document.getElementById('guildRealm').value;
             const guildName = document.getElementById('guildName').value;
