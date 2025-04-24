@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glory Achievement Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        header {
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Glory Achievement Planner</h1>
+        <p>Enter your guild's details to fetch Raider.IO data</p>
+    </header>
+    <div class="container">
+        <form id="guildForm">
+            <div class="form-group">
+                <label for="guildRegion">Region:</label>
+                <input type="text" id="guildRegion" placeholder="e.g., US" required>
+            </div>
+            <div class="form-group">
+                <label for="guildRealm">Realm:</label>
+                <input type="text" id="guildRealm" placeholder="e.g., Illidan" required>
+            </div>
+            <div class="form-group">
+                <label for="guildName">Guild Name:</label>
+                <input type="text" id="guildName" placeholder="e.g., AwesomeGuild" required>
+            </div>
+            <button type="submit">Fetch Guild Info</button>
+        </form>
+        <div id="output">
+            <table id="guildTable">
+                <thead>
+                    <tr>
+                        <th>Character Name</th>
+                        <th>Role</th>
+                        <th>Achievement Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Content will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('guildForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const region = document.getElementById('guildRegion').value;
+            const realm = document.getElementById('guildRealm').value;
+            const guildName = document.getElementById('guildName').value;
+
+            const apiUrl = `https://raider.io/api/v1/guilds/profile?region=${region}&realm=${realm}&name=${guildName}&fields=members`;
+            const output = document.getElementById('output');
+            const tableBody = document.getElementById('guildTable').querySelector('tbody');
+            tableBody.innerHTML = ""; // Clear previous data
+
+            output.innerHTML = "<p>Loading guild data...</p>";
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Failed to fetch data. Check your input.");
+
+                const data = await response.json();
+                output.innerHTML = ""; // Clear loading indicator
+                
+                data.members.forEach(member => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${member.character.name}</td>
+                        <td>${member.character.role || "N/A"}</td>
+                        <td>${member.character.achievementPoints || "N/A"}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                output.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
