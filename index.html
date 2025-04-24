@@ -23,12 +23,6 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .filter-group {
-            margin: 10px 0;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -43,16 +37,6 @@
             background-color: #f9f9f9;
             cursor: pointer;
         }
-        table tbody tr.highlight {
-            background-color: #d4f4dd; /* Highlight completed achievements */
-        }
-        #loadingSpinner {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #555;
-        }
     </style>
 </head>
 <body>
@@ -62,34 +46,23 @@
     </header>
     <div class="container">
         <form id="raiderForm">
-            <div class="form-group">
-                <label for="guildRegion" aria-label="Region">Region:</label>
+            <div>
+                <label for="guildRegion">Region:</label>
                 <input type="text" id="guildRegion" placeholder="e.g., US" required>
             </div>
-            <div class="form-group">
-                <label for="guildRealm" aria-label="Realm">Realm:</label>
+            <div>
+                <label for="guildRealm">Realm:</label>
                 <input type="text" id="guildRealm" placeholder="e.g., Illidan" required>
             </div>
-            <div class="form-group">
-                <label for="guildName" aria-label="Guild Name">Guild Name:</label>
+            <div>
+                <label for="guildName">Guild Name:</label>
                 <input type="text" id="guildName" placeholder="e.g., YourGuildName" required>
             </div>
             <button type="submit">Fetch Guild Info</button>
         </form>
-        
-        <div class="filter-group">
-            <label for="filterRole" aria-label="Filter by Role">Filter by Role:</label>
-            <select id="filterRole">
-                <option value="">All</option>
-                <option value="Tank">Tank</option>
-                <option value="Healer">Healer</option>
-                <option value="DPS">DPS</option>
-            </select>
-        </div>
 
         <div id="output">
             <h2>Guild Members:</h2>
-            <div id="loadingSpinner" style="display: none;">Loading...</div>
             <table id="guildTable">
                 <thead>
                     <tr>
@@ -104,70 +77,6 @@
             </table>
         </div>
     </div>
-
-    <script>
-        document.getElementById('raiderForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            console.log(document.getElementById('guildTable'));
-            console.log(document.getElementById('guildTable').querySelector('tbody'));
-            const region = document.getElementById('guildRegion').value;
-            const realm = document.getElementById('guildRealm').value;
-            const guildName = document.getElementById('guildName').value;
-
-            // Add a loading indicator
-            const output = document.getElementById('output');
-            const spinner = document.getElementById('loadingSpinner');
-            spinner.style.display = 'block';
-
-            try {
-                const response = await fetch(`https://raider.io/api/v1/guilds/profile?region=${region}&realm=${realm}&name=${guildName}&fields=members`);
-                
-                // Handle non-200 responses
-                if (!response.ok) {
-                    throw new Error('Guild not found or invalid details provided');
-                }
-
-                const data = await response.json();
-                spinner.style.display = 'none'; // Hide loading spinner
-                output.innerHTML = ''; // Clear loading indicator
-                displayGuildData(data);
-            } catch (error) {
-                spinner.style.display = 'none'; // Hide loading spinner
-                output.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-            }
-        });
-
-        const displayGuildData = (data) => {
-            const roster = data.members;
-            const tableBody = document.querySelector('#guildTable tbody');
-            tableBody.innerHTML = ''; // Clear previous data
-
-            roster.forEach((member) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${member.character.name}</td>
-                    <td>${member.character.role}</td>
-                    <td>${member.character.achievementPoints}</td>
-                `;
-
-                // Highlight rows conditionally (example: if achievement points > 10000)
-                if (member.character.achievementPoints > 10000) {
-                    row.classList.add('highlight');
-                }
-
-                tableBody.appendChild(row);
-            });
-        };
-
-        document.getElementById('filterRole').addEventListener('change', (e) => {
-            const selectedRole = e.target.value;
-            const rows = document.querySelectorAll('#guildTable tbody tr');
-            rows.forEach(row => {
-                const role = row.children[1].textContent; // Assuming the role is in the second column
-                row.style.display = (selectedRole === '' || role === selectedRole) ? '' : 'none';
-            });
-        });
-    </script>
+    <script src="app.js"></script> <!-- You can place JavaScript code inside the <script> section here or in a separate file -->
 </body>
 </html>
